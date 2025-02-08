@@ -1,0 +1,1 @@
+@reboot sudo python3 /home/pi/wk/wordclock.py
