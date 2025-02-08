@@ -29,8 +29,8 @@ class wordclock:
         # Get path of the directory where this file is stored
         self.basePath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
-        self.currentGitHash = subprocess.check_output(["git", "describe", "--tags"], cwd=self.basePath).strip().decode()
-        logging.info("Software version: " + self.currentGitHash)
+#        self.currentGitHash = subprocess.check_output(["git", "describe", "--tags"], cwd=self.basePath).strip().decode()
+#        logging.info("Software version: " + self.currentGitHash)
 
         self.config = wccfg.wordclock_config(self.basePath)
 
