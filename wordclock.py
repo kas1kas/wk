@@ -1,4 +1,6 @@
 #v1.1 sorted l60
+#v2.1 Internet check wifiOK()
+#needs modified crontab and sudo crontab (for wifi-connect-headless-wifi)
 import sys
 import coloredlogs
 from importlib import import_module
@@ -28,9 +30,6 @@ class wordclock:
         """
         # Get path of the directory where this file is stored
         self.basePath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-
-#        self.currentGitHash = subprocess.check_output(["git", "describe", "--tags"], cwd=self.basePath).strip().decode()
-#        logging.info("Software version: " + self.currentGitHash)
 
         self.config = wccfg.wordclock_config(self.basePath)
 
@@ -128,7 +127,6 @@ class wordclock:
 	        self.plugins[self.plugin_index].run(self.wcd, self.wci)
         except:
             logging.error('Error in plugin ' + self.plugins[self.plugin_index].name + '.')
-            logging.error('PLEASE PROVIDE THE CURRENT SOFTWARE VERSION (GIT HASH), WHEN REPORTING THIS ERROR: ' + self.currentGitHash)
             self.wcd.setImage(os.path.join(self.pathToGeneralIcons, 'error.png'))
             traceback.print_exc()
             raise
@@ -147,6 +145,19 @@ class wordclock:
         self.plugin_index = plugin_index if plugin_index is not None else self.default_plugin
         self.wci.setEvent(self.wci.EVENT_NEXT_PLUGIN_REQUESTED)
 
+    def wifiOK():
+        result = subprocess.run(['nmcli', 'general', 'status'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode==0:
+          if 'limited' in result.stdout.lower():
+            print("no Internet")
+            return False
+          elif 'full' in result.stdout.lower():
+            print("Internet OK")
+            return True
+        else:
+          print("not connected")
+          return False
+      
     def run(self):
         """
         Makes the wordclock run...
@@ -198,6 +209,10 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
     coloredlogs.install()
 
+    # Start only with internet Connection
+    if not wordclock.wifiOK():
+      sys.exit()
+      
     word_clock = wordclock()
     developer_mode = word_clock.developer_mode_active
     if not developer_mode:
